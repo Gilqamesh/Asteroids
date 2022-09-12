@@ -34,6 +34,7 @@ using namespace std;
 # define LOG(x) (cout << x << endl)
 # define LINE() (LOG(__FILE__ << " " << __LINE__))
 
+#if defined(G_DEBUG)
 struct debug_cycle_counter
 {
     u64 CycleCount;
@@ -47,13 +48,13 @@ enum
     DebugCycleCounter_Count
 };
 
-#define BEGIN_TIMED_BLOCK(ID) u64 StartCycleCount##ID = __rdtsc();
-#define END_TIMED_BLOCK(ID) {\
+# define BEGIN_TIMED_BLOCK(ID) u64 StartCycleCount##ID = __rdtsc();
+# define END_TIMED_BLOCK(ID) {\
     DebugGlobalMemory->Counters[DebugCycleCounter_##ID].CycleCount += __rdtsc() - StartCycleCount##ID;\
     ++DebugGlobalMemory->Counters[DebugCycleCounter_##ID].HitCount;\
 }
-
 extern struct game_memory *DebugGlobalMemory;
+#endif
 
 struct game_window
 {
@@ -78,7 +79,9 @@ struct game_memory
     void *TransientStorage;
     u64 TransientStorageSize;
 
+#if defined(G_DEBUG)
     debug_cycle_counter Counters[DebugCycleCounter_Count];
+#endif
 };
 
 #endif

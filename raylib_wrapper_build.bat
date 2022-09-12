@@ -2,7 +2,6 @@ set CommonCompilerFlags=-Oi -O2 -FC -Zi -nologo -EHa -MD -DG_DEBUG=1
 set CommonLinkerFlags=-incremental:no -opt:ref -subsystem:WINDOWS raylib.lib user32.lib opengl32.lib gdi32.lib winmm.lib Shell32.lib
 
 cl %CommonCompilerFlags% src/raylib_wrapper.cpp -LD /link %CommonLinkerFlags% ^
-    -EXPORT:DebugPrintCycleCounters^
     -EXPORT:RL_InitWindow^
     -EXPORT:RL_WindowShouldClose^
     -EXPORT:RL_CloseWindow^
@@ -214,7 +213,9 @@ cl %CommonCompilerFlags% src/raylib_wrapper.cpp -LD /link %CommonLinkerFlags% ^
     -EXPORT:RL_DrawRectangleRounded^
     -EXPORT:RL_DrawRectangleRoundedLines^
     -EXPORT:RL_DrawTriangle^
+    -EXPORT:DrawTriangleRotated^
     -EXPORT:RL_DrawTriangleLines^
+    -EXPORT:DrawTriangleLinesRotated^
     -EXPORT:RL_DrawTriangleFan^
     -EXPORT:RL_DrawTriangleStrip^
     -EXPORT:RL_DrawPoly^
@@ -305,6 +306,8 @@ cl %CommonCompilerFlags% src/raylib_wrapper.cpp -LD /link %CommonLinkerFlags% ^
     -EXPORT:RL_DrawTexture^
     -EXPORT:RL_DrawTextureV^
     -EXPORT:RL_DrawTextureEx^
+    -EXPORT:DrawTextureRotatedScaled^
+    -EXPORT:DrawTextureRotated^
     -EXPORT:RL_DrawTextureRec^
     -EXPORT:RL_DrawTextureQuad^
     -EXPORT:RL_DrawTextureTiled^

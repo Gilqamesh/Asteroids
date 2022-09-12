@@ -10,6 +10,9 @@
         "fstream": "cpp",
         "iosfwd": "cpp",
         "*.m": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "chrono": "cpp",
+        "cmath": "cpp",
+        "functional": "cpp"
     }
 }

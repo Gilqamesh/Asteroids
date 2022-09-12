@@ -1,55 +1,55 @@
 #ifndef RAYLIB_WRAPPER_HPP
-# define RAYLIB_WRAPPER_HPP
+#define RAYLIB_WRAPPER_HPP
 
-# include "types.hpp"
-# include <string>
+#include "types.hpp"
+#include <string>
 
 using namespace std;
 
-struct Vector2;         // Vector2 type
-struct Vector3;         // Vector3 type
-struct Vector4;         // Vector4 type
+struct Vector2;             // Vector2 type
+struct Vector3;             // Vector3 type
+struct Vector4;             // Vector4 type
 typedef Vector4 Quaternion; // Quaternion type
-struct Matrix;          // Matrix type (OpenGL style 4x4)
-struct Color;           // Color type, RGBA (32bit)
-struct Rectangle;             // Rectangle type
+struct Matrix;              // Matrix type (OpenGL style 4x4)
+struct Color;               // Color type, RGBA (32bit)
+struct Rec;                 // Rec type
 
-struct Image;           // Image type (multiple pixel formats supported)
-                        // NOTE: Data stored in CPU memory (RAM)               
+struct Image; // Image type (multiple pixel formats supported)
+              // NOTE: Data stored in CPU memory (RAM)
 struct Texture;
-typedef Texture Texture2D;         // Texture type (multiple internal formats supported)
-                        // NOTE: Data stored in GPU memory (VRAM)
+typedef Texture Texture2D; // Texture type (multiple internal formats supported)
+                           // NOTE: Data stored in GPU memory (VRAM)
 typedef Texture2D TextureCubemap;
 struct RenderTexture;
-typedef RenderTexture RenderTexture2D;   // RenderTexture type, for texture rendering
-struct NPatchInfo;      // N-Patch layout info
-struct GlyphInfo;       // Font character glyph info
-struct Font;            // Font type, includes texture and chars data
+typedef RenderTexture RenderTexture2D; // RenderTexture type, for texture rendering
+struct NPatchInfo;                     // N-Patch layout info
+struct GlyphInfo;                      // Font character glyph info
+struct Font;                           // Font type, includes texture and chars data
 
 struct Camera3D;
-typedef Camera3D Camera;          // Camera type, defines 3d camera position/orientation
-struct Camera2D;        // Camera2D type, defines a 2d camera
-struct Mesh;            // Vertex data definning a mesh
-struct Shader;          // Shader type (generic shader)
-struct MaterialMap;     // Material texture map
-struct Material;        // Material type
-struct Model;           // Basic 3d Model type
-struct Transform;       // Transformation (used for bones)
-struct BoneInfo;        // Bone information
-struct ModelAnimation;  // Model animation data (bones and frames)
-struct Ray;             // Ray type (useful for raycast)
-struct RayCollision;    // Raycast hit information
-struct BoundingBox;     // Bounding box type for 3d mesh
+typedef Camera3D Camera; // Camera type, defines 3d camera position/orientation
+struct Camera2D;         // Camera2D type, defines a 2d camera
+struct Mesh;             // Vertex data definning a mesh
+struct Shader;           // Shader type (generic shader)
+struct MaterialMap;      // Material texture map
+struct Material;         // Material type
+struct Model;            // Basic 3d Model type
+struct Transform;        // Transformation (used for bones)
+struct BoneInfo;         // Bone information
+struct ModelAnimation;   // Model animation data (bones and frames)
+struct Ray;              // Ray type (useful for raycast)
+struct RayCollision;     // Raycast hit information
+struct BoundingBox;      // Bounding box type for 3d mesh
 
-struct Wave;            // Wave type, defines audio wave data
-struct Sound;           // Basic Sound source and buffer
-struct Music;           // Music type (file streaming from memory)
-struct AudioStream;     // Raw audio stream type
+struct Wave;        // Wave type, defines audio wave data
+struct Sound;       // Basic Sound source and buffer
+struct Music;       // Music type (file streaming from memory)
+struct AudioStream; // Raw audio stream type
 
-struct VrDeviceInfo;    // VR device parameters
-struct VrStereoConfig;  // VR Stereo rendering configuration for simulator
+struct VrDeviceInfo;   // VR device parameters
+struct VrStereoConfig; // VR Stereo rendering configuration for simulator
 
-struct FilePathList;    // File path list
+struct FilePathList; // File path list
 
 struct game_window;
 struct game_memory;
@@ -61,13 +61,9 @@ struct AudioStream;
 typedef void (*TraceLogCallback)(int logType, const char *text, va_list args);
 typedef void (*AudioCallback)(void *bufferData, unsigned int frames);
 
-// specific to raylib_wrapper
-
-typedef void (*debug_print_cycle_counters)(game_memory*, char*, u32);
-
 // core
 
-typedef void (*rl_init_window)(i32, i32, const char*);
+typedef void (*rl_init_window)(i32, i32, const char *);
 typedef b32 (*rl_window_should_close)(void);
 typedef void (*rl_close_window)(void);
 typedef b32 (*rl_is_window_ready)(void);
@@ -85,7 +81,7 @@ typedef void (*rl_maximize_window)(void);
 typedef void (*rl_minimize_window)(void);
 typedef void (*rl_restore_window)(void);
 typedef void (*rl_set_window_icon)(Image);
-typedef void (*rl_set_window_title)(const char*);
+typedef void (*rl_set_window_title)(const char *);
 typedef void (*rl_set_window_position)(i32, i32);
 typedef void (*rl_set_window_monitor)(i32);
 typedef void (*rl_set_window_min_size)(i32, i32);
@@ -107,7 +103,7 @@ typedef i32 (*rl_get_monitor_refresh_rate)(i32);
 typedef Vector2 (*rl_get_window_position)(void);
 typedef Vector2 (*rl_get_window_scale_dpi)(void);
 typedef const char *(*rl_get_monitor_name)(i32);
-typedef void (*rl_set_clipboard_text)(const char*);
+typedef void (*rl_set_clipboard_text)(const char *);
 typedef const char *(*rl_get_clipboard_text)(void);
 typedef void (*rl_enable_event_waiting)(void);
 typedef void (*rl_disable_event_waiting)(void);
@@ -135,12 +131,12 @@ typedef void (*rl_begin_blend_mode)(i32);
 typedef void (*rl_end_blend_mode)(void);
 typedef void (*rl_begin_scissor_mode)(i32, i32, i32, i32);
 typedef void (*rl_end_scissor_mode)(void);
-typedef Shader (*rl_load_shader)(const char*, const char*);
-typedef Shader (*rl_load_shader_from_memory)(const char*, const char*);
-typedef i32 (*rl_get_shader_location)(Shader, const char*);
-typedef i32 (*rl_get_shader_location_attrib)(Shader, const char*);
-typedef void (*rl_set_shader_value)(Shader, i32, const void*, i32);
-typedef void (*rl_set_shader_value_v)(Shader, i32, const void*, i32, i32);
+typedef Shader (*rl_load_shader)(const char *, const char *);
+typedef Shader (*rl_load_shader_from_memory)(const char *, const char *);
+typedef i32 (*rl_get_shader_location)(Shader, const char *);
+typedef i32 (*rl_get_shader_location_attrib)(Shader, const char *);
+typedef void (*rl_set_shader_value)(Shader, i32, const void *, i32);
+typedef void (*rl_set_shader_value_v)(Shader, i32, const void *, i32, i32);
 typedef void (*rl_set_shader_value_matrix)(Shader, i32, Matrix);
 typedef void (*rl_set_shader_value_texture)(Shader, i32, Texture2D);
 typedef void (*rl_unload_shader)(Shader);
@@ -157,45 +153,45 @@ typedef r32 (*rl_get_frame_time)(void);
 typedef r64 (*rl_get_time)(void);
 typedef i32 (*rl_get_random_value)(i32, i32);
 typedef void (*rl_set_random_seed)(u32);
-typedef void (*rl_take_screenshot)(const char*);
+typedef void (*rl_take_screenshot)(const char *);
 typedef void (*rl_set_config_flags)(u32);
 typedef void (*rl_set_trace_log_level)(i32);
 typedef void *(*rl_mem_alloc)(i32);
-typedef void *(*rl_mem_realloc)(void*, i32);
-typedef void (*rl_mem_free)(void*);
-typedef void (*rl_open_url)(const char*);
+typedef void *(*rl_mem_realloc)(void *, i32);
+typedef void (*rl_mem_free)(void *);
+typedef void (*rl_open_url)(const char *);
 typedef void (*rl_set_trace_log_callback)(TraceLogCallback);
-typedef unsigned char *(*rl_load_file_data)(const char*, u32*);
-typedef void (*rl_unload_file_data)(unsigned char*);
-typedef b32 (*rl_save_file_data)(const char*, void*, u32);
-typedef b32 (*rl_export_data_as_code)(const char*, u32, const char*);
-typedef char *(*rl_load_file_text)(const char*);
-typedef void (*rl_unload_file_text)(char*);
-typedef b32 (*rl_save_file_text)(const char*, char*);
-typedef b32 (*rl_file_exists)(const char*);
-typedef b32 (*rl_directory_exists)(const char*);
-typedef b32 (*rl_is_file_extension)(const char*, const char*);
-typedef i32 (*rl_get_file_length)(const char*);
-typedef const char *(*rl_get_file_extension)(const char*);
-typedef const char *(*rl_get_file_name)(const char*);
-typedef const char *(*rl_get_file_name_without_ext)(const char*);
-typedef const char *(*rl_get_directory_path)(const char*);
-typedef const char *(*rl_get_prev_directory_path)(const char*);
+typedef unsigned char *(*rl_load_file_data)(const char *, u32 *);
+typedef void (*rl_unload_file_data)(unsigned char *);
+typedef b32 (*rl_save_file_data)(const char *, void *, u32);
+typedef b32 (*rl_export_data_as_code)(const char *, u32, const char *);
+typedef char *(*rl_load_file_text)(const char *);
+typedef void (*rl_unload_file_text)(char *);
+typedef b32 (*rl_save_file_text)(const char *, char *);
+typedef b32 (*rl_file_exists)(const char *);
+typedef b32 (*rl_directory_exists)(const char *);
+typedef b32 (*rl_is_file_extension)(const char *, const char *);
+typedef i32 (*rl_get_file_length)(const char *);
+typedef const char *(*rl_get_file_extension)(const char *);
+typedef const char *(*rl_get_file_name)(const char *);
+typedef const char *(*rl_get_file_name_without_ext)(const char *);
+typedef const char *(*rl_get_directory_path)(const char *);
+typedef const char *(*rl_get_prev_directory_path)(const char *);
 typedef const char *(*rl_get_working_directory)(void);
 typedef const char *(*rl_get_application_directory)(void);
-typedef b32 (*rl_change_directory)(const char*);
-typedef b32 (*rl_is_path_file)(const char*);
-typedef FilePathList (*rl_load_directory_files)(const char*);
-typedef FilePathList (*rl_load_directory_files_ex)(const char*, const char*, b32);
+typedef b32 (*rl_change_directory)(const char *);
+typedef b32 (*rl_is_path_file)(const char *);
+typedef FilePathList (*rl_load_directory_files)(const char *);
+typedef FilePathList (*rl_load_directory_files_ex)(const char *, const char *, b32);
 typedef void (*rl_unload_directory_files)(FilePathList);
 typedef b32 (*rl_is_file_dropped)(void);
 typedef FilePathList (*rl_load_dropped_files)(void);
 typedef void (*rl_unload_dropped_files)(FilePathList);
-typedef long (*rl_get_file_mod_time)(const char*);
-typedef unsigned char *(*rl_compress_data)(unsigned char*, i32, i32*);
-typedef unsigned char *(*rl_decompress_data)(unsigned char*, i32, i32*);
-typedef char *(*rl_encode_data_base64)(const unsigned char*, i32, i32*);
-typedef unsigned char *(*rl_decode_data_base64)(const unsigned char*, i32*);
+typedef long (*rl_get_file_mod_time)(const char *);
+typedef unsigned char *(*rl_compress_data)(unsigned char *, i32, i32 *);
+typedef unsigned char *(*rl_decompress_data)(unsigned char *, i32, i32 *);
+typedef char *(*rl_encode_data_base64)(const unsigned char *, i32, i32 *);
+typedef unsigned char *(*rl_decode_data_base64)(const unsigned char *, i32 *);
 typedef b32 (*rl_is_key_pressed)(i32);
 typedef b32 (*rl_is_key_down)(i32);
 typedef b32 (*rl_is_key_released)(i32);
@@ -212,7 +208,7 @@ typedef b32 (*rl_is_gamepad_button_up)(i32, i32);
 typedef i32 (*rl_get_gamepad_button_pressed)(void);
 typedef i32 (*rl_get_gamepad_axis_count)(i32);
 typedef r32 (*rl_get_gamepad_axis_movement)(i32, i32);
-typedef i32 (*rl_set_gamepad_mappings)(const char*);
+typedef i32 (*rl_set_gamepad_mappings)(const char *);
 typedef b32 (*rl_is_mouse_button_pressed)(i32);
 typedef b32 (*rl_is_mouse_button_down)(i32);
 typedef b32 (*rl_is_mouse_button_released)(i32);
@@ -241,7 +237,7 @@ typedef r32 (*rl_get_gesture_drag_angle)(void);
 typedef Vector2 (*rl_get_gesture_pinch_vector)(void);
 typedef r32 (*rl_get_gesture_pinch_angle)(void);
 typedef void (*rl_set_camera_mode)(Camera, i32);
-typedef void (*rl_update_camera)(Camera*);
+typedef void (*rl_update_camera)(Camera *);
 typedef void (*rl_set_camera_pan_control)(i32);
 typedef void (*rl_set_camera_alt_control)(i32);
 typedef void (*rl_set_camera_smooth_zoom_control)(i32);
@@ -249,7 +245,7 @@ typedef void (*rl_set_camera_move_controls)(i32, i32, i32, i32, i32, i32);
 
 // shape drawing
 
-typedef void (*rl_set_shapes_texture)(Texture2D, Rectangle);
+typedef void (*rl_set_shapes_texture)(Texture2D, Rec);
 typedef void (*rl_draw_pixel)(i32, i32, Color);
 typedef void (*rl_draw_pixel_v)(Vector2, Color);
 typedef void (*rl_draw_line)(i32, i32, i32, i32, Color);
@@ -258,7 +254,7 @@ typedef void (*rl_draw_line_ex)(Vector2, Vector2, r32, Color);
 typedef void (*rl_draw_line_bezier)(Vector2, Vector2, r32, Color);
 typedef void (*rl_draw_line_bezier_quad)(Vector2, Vector2, Vector2, r32, Color);
 typedef void (*rl_draw_line_bezier_cubic)(Vector2, Vector2, Vector2, Vector2, r32, Color);
-typedef void (*rl_draw_line_strip)(Vector2, i32, Color);
+typedef void (*rl_draw_line_strip)(Vector2*, i32, Color);
 typedef void (*rl_draw_circle)(i32, i32, r32, Color);
 typedef void (*rl_draw_circle_sector)(Vector2, r32, r32, r32, i32, Color);
 typedef void (*rl_draw_circle_sector_lines)(Vector2, r32, r32, r32, i32, Color);
@@ -271,43 +267,45 @@ typedef void (*rl_draw_ring)(Vector2, r32, r32, r32, r32, i32, Color);
 typedef void (*rl_draw_ring_lines)(Vector2, r32, r32, r32, r32, i32, Color);
 typedef void (*rl_draw_rectangle)(i32, i32, i32, i32, Color);
 typedef void (*rl_draw_rectangle_v)(Vector2, Vector2, Color);
-typedef void (*rl_draw_rectangle_rec)(Rectangle, Color);
-typedef void (*rl_draw_rectangle_pro)(Rectangle, Vector2, r32, Color);
+typedef void (*rl_draw_rectangle_rec)(Rec, Color);
+typedef void (*rl_draw_rectangle_pro)(Rec, Vector2, r32, Color);
 typedef void (*rl_draw_rectangle_gradient_v)(i32, i32, i32, i32, Color, Color);
 typedef void (*rl_draw_rectangle_gradident_h)(i32, i32, i32, i32, Color, Color);
-typedef void (*rl_draw_rectangle_gradient_ex)(Rectangle, Color, Color, Color, Color);
+typedef void (*rl_draw_rectangle_gradient_ex)(Rec, Color, Color, Color, Color);
 typedef void (*rl_draw_rectangle_lines)(i32, i32, i32, i32, Color);
-typedef void (*rl_draw_rectangle_lines_ex)(Rectangle, r32, Color);
-typedef void (*rl_draw_rectange_rounded)(Rectangle, r32, i32, Color);
-typedef void (*rl_draw_rectangle_bounded_lines)(Rectangle, r32, i32, r32, Color);
+typedef void (*rl_draw_rectangle_lines_ex)(Rec, r32, Color);
+typedef void (*rl_draw_rectange_rounded)(Rec, r32, i32, Color);
+typedef void (*rl_draw_rectangle_bounded_lines)(Rec, r32, i32, r32, Color);
 typedef void (*rl_draw_triangle)(Vector2, Vector2, Vector2, Color);
+typedef void (*draw_triangle_rotated)(Vector2, Vector2, Vector2, Vector2, r32, Color);
 typedef void (*rl_draw_triangle_lines)(Vector2, Vector2, Vector2, Color);
-typedef void (*rl_draw_triangle_fan)(Vector2*, i32, Color);
-typedef void (*rl_draw_triangle_strip)(Vector2*, i32, Color);
+typedef void (*draw_triangle_lines_rotated)(Vector2, Vector2, Vector2, Vector2, r32, Color);
+typedef void (*rl_draw_triangle_fan)(Vector2 *, i32, Color);
+typedef void (*rl_draw_triangle_strip)(Vector2 *, i32, Color);
 typedef void (*rl_draw_poly)(Vector2, i32, r32, r32, Color);
 typedef void (*rl_draw_poly_lines)(Vector2, i32, r32, r32, Color);
 typedef void (*rl_draw_poly_lines_ex)(Vector2, i32, r32, r32, r32, Color);
-typedef b32 (*rl_check_collision_recs)(Rectangle, Rectangle);
+typedef b32 (*rl_check_collision_recs)(Rec, Rec);
 typedef b32 (*rl_check_collision_circles)(Vector2, r32, Vector2, r32);
-typedef b32 (*rl_check_collision_circle_rec)(Vector2, r32, Rectangle);
-typedef b32 (*rl_check_collision_point_rec)(Vector2, Rectangle);
+typedef b32 (*rl_check_collision_circle_rec)(Vector2, r32, Rec);
+typedef b32 (*rl_check_collision_point_rec)(Vector2, Rec);
 typedef b32 (*rl_check_collision_point_circle)(Vector2, Vector2, r32);
 typedef b32 (*rl_check_collision_point_triangle)(Vector2, Vector2, Vector2, Vector2);
-typedef b32 (*rl_check_collision_lines)(Vector2, Vector2, Vector2, Vector2, Vector2*);
+typedef b32 (*rl_check_collision_lines)(Vector2, Vector2, Vector2, Vector2, Vector2 *);
 typedef b32 (*rl_check_collision_point_line)(Vector2, Vector2, Vector2, i32);
-typedef Rectangle (*rl_get_collision_rec)(Rectangle, Rectangle);
+typedef Rec (*rl_get_collision_rec)(Rec, Rec);
 
 // textures
 
-typedef Image (*rl_load_image)(const char*);
-typedef Image (*rl_load_image_raw)(const char*, i32, i32, i32, i32);
-typedef Image (*rl_load_image_anim)(const char*, i32*);
-typedef Image (*rl_load_image_from_memory)(const char*, const unsigned char*, i32);
+typedef Image (*rl_load_image)(const char *);
+typedef Image (*rl_load_image_raw)(const char *, i32, i32, i32, i32);
+typedef Image (*rl_load_image_anim)(const char *, i32 *);
+typedef Image (*rl_load_image_from_memory)(const char *, const unsigned char *, i32);
 typedef Image (*rl_load_image_from_texture)(Texture2D);
 typedef Image (*rl_load_image_from_screen)(void);
 typedef void (*rl_unload_image)(Image);
-typedef b32 (*rl_export_image)(Image, const char*);
-typedef b32 (*rl_export_image_as_code)(Image, const char*);
+typedef b32 (*rl_export_image)(Image, const char *);
+typedef b32 (*rl_export_image_as_code)(Image, const char *);
 typedef Image (*rl_gen_image_color)(i32, i32, Color);
 typedef Image (*rl_gen_image_gradient_v)(i32, i32, Color, Color);
 typedef Image (*rl_gen_image_gradient_h)(i32, i32, Color, Color);
@@ -316,71 +314,73 @@ typedef Image (*rl_gen_image_checked)(i32, i32, i32, i32, Color, Color);
 typedef Image (*rl_gen_image_white_noise)(i32, i32, r32);
 typedef Image (*rl_gen_image_cellular)(i32, i32, i32);
 typedef Image (*rl_image_copy)(Image);
-typedef Image (*rl_image_from_image)(Image, Rectangle);
-typedef Image (*rl_image_text)(const char*, i32, Color);
-typedef Image (*rl_image_text_ex)(Font, const char*, r32, r32, Color);
-typedef void (*rl_image_format)(Image*, i32);
-typedef void (*rl_image_to_pot)(Image*, Color);
-typedef void (*rl_image_crop)(Image*, Rectangle);
-typedef void (*rl_image_alpha_crop)(Image*, r32);
-typedef void (*rl_image_alpha_clear)(Image*, Color, r32);
-typedef void (*rl_image_alpha_mask)(Image*, Image);
-typedef void (*rl_image_alpha_premultiply)(Image*);
-typedef void (*rl_image_resize)(Image*, i32, i32);
-typedef void (*rl_image_resize_nn)(Image*, i32, i32);
-typedef void (*rl_image_resize_canvas)(Image*, i32, i32, i32, i32, Color);
-typedef void (*rl_image_mipmaps)(Image);
-typedef void (*rl_image_dither)(Image*, i32, i32, i32, i32);
-typedef void (*rl_image_flip_vertical)(Image*);
-typedef void (*rl_image_flip_horizontal)(Image*);
-typedef void (*rl_image_rotate_cw)(Image*);
-typedef void (*rl_image_rotate_ccw)(Image*);
-typedef void (*rl_image_color_tint)(Image*, Color);
-typedef void (*rl_image_color_invert)(Image*);
-typedef void (*rl_image_color_grayscale)(Image*);
-typedef void (*rl_image_color_contrast)(Image*, r32);
-typedef void (*rl_image_color_brightness)(Image*, i32);
-typedef void (*rl_image_color_replace)(Image*, Color, Color);
+typedef Image (*rl_image_from_image)(Image, Rec);
+typedef Image (*rl_image_text)(const char *, i32, Color);
+typedef Image (*rl_image_text_ex)(Font, const char *, r32, r32, Color);
+typedef void (*rl_image_format)(Image *, i32);
+typedef void (*rl_image_to_pot)(Image *, Color);
+typedef void (*rl_image_crop)(Image *, Rec);
+typedef void (*rl_image_alpha_crop)(Image *, r32);
+typedef void (*rl_image_alpha_clear)(Image *, Color, r32);
+typedef void (*rl_image_alpha_mask)(Image *, Image);
+typedef void (*rl_image_alpha_premultiply)(Image *);
+typedef void (*rl_image_resize)(Image *, i32, i32);
+typedef void (*rl_image_resize_nn)(Image *, i32, i32);
+typedef void (*rl_image_resize_canvas)(Image *, i32, i32, i32, i32, Color);
+typedef void (*rl_image_mipmaps)(Image*);
+typedef void (*rl_image_dither)(Image *, i32, i32, i32, i32);
+typedef void (*rl_image_flip_vertical)(Image *);
+typedef void (*rl_image_flip_horizontal)(Image *);
+typedef void (*rl_image_rotate_cw)(Image *);
+typedef void (*rl_image_rotate_ccw)(Image *);
+typedef void (*rl_image_color_tint)(Image *, Color);
+typedef void (*rl_image_color_invert)(Image *);
+typedef void (*rl_image_color_grayscale)(Image *);
+typedef void (*rl_image_color_contrast)(Image *, r32);
+typedef void (*rl_image_color_brightness)(Image *, i32);
+typedef void (*rl_image_color_replace)(Image *, Color, Color);
 typedef Color *(*rl_load_image_colors)(Image);
-typedef Color *(*rl_load_image_palette)(Image, i32, i32*);
-typedef void (*rl_unload_image_colors)(Color*);
-typedef void (*rl_unload_image_palette)(Color*);
-typedef Rectangle (*rl_get_image_alpha_border)(Image, r32);
+typedef Color *(*rl_load_image_palette)(Image, i32, i32 *);
+typedef void (*rl_unload_image_colors)(Color *);
+typedef void (*rl_unload_image_palette)(Color *);
+typedef Rec (*rl_get_image_alpha_border)(Image, r32);
 typedef Color (*rl_get_image_color)(Image, i32, i32);
-typedef void (*rl_image_clear_background)(Image*, Color);
-typedef void (*rl_image_draw_pixel)(Image*, i32, i32, Color);
-typedef void (*rl_image_draw_pixel_v)(Image*, Vector2, Color);
-typedef void (*rl_image_draw_line)(Image*, i32, i32, i32, i32, Color);
-typedef void (*rl_image_draw_line_v)(Image*, Vector2, Vector2, Color);
-typedef void (*rl_image_draw_circle)(Image*, i32, i32, i32, Color);
-typedef void (*rl_image_draw_circle_v)(Image*, Vector2, i32, Color);
-typedef void (*rl_image_draw_rec)(Image*, i32, i32, i32, i32, Color);
-typedef void (*rl_image_draw_rec_v)(Image*, Vector2, Vector2, Color);
-typedef void (*rl_image_draw_rec_rec)(Image*, Rectangle, Color);
-typedef void (*rl_image_draw_rec_lines)(Image*, Rectangle, i32, Color);
-typedef void (*rl_image_draw)(Image*, Image, Rectangle, Rectangle, Color);
-typedef void (*rl_image_draw_text)(Image*, const char*, i32, i32, i32, Color);
-typedef void (*rl_image_draw_text_ex)(Image*, Font, const char*, Vector2, r32, r32, Color);
-typedef Texture2D (*rl_load_texture)(const char*);
+typedef void (*rl_image_clear_background)(Image *, Color);
+typedef void (*rl_image_draw_pixel)(Image *, i32, i32, Color);
+typedef void (*rl_image_draw_pixel_v)(Image *, Vector2, Color);
+typedef void (*rl_image_draw_line)(Image *, i32, i32, i32, i32, Color);
+typedef void (*rl_image_draw_line_v)(Image *, Vector2, Vector2, Color);
+typedef void (*rl_image_draw_circle)(Image *, i32, i32, i32, Color);
+typedef void (*rl_image_draw_circle_v)(Image *, Vector2, i32, Color);
+typedef void (*rl_image_draw_rec)(Image *, i32, i32, i32, i32, Color);
+typedef void (*rl_image_draw_rec_v)(Image *, Vector2, Vector2, Color);
+typedef void (*rl_image_draw_rec_rec)(Image *, Rec, Color);
+typedef void (*rl_image_draw_rec_lines)(Image *, Rec, i32, Color);
+typedef void (*rl_image_draw)(Image *, Image, Rec, Rec, Color);
+typedef void (*rl_image_draw_text)(Image *, const char *, i32, i32, i32, Color);
+typedef void (*rl_image_draw_text_ex)(Image *, Font, const char *, Vector2, r32, r32, Color);
+typedef Texture2D (*rl_load_texture)(const char *);
 typedef Texture2D (*rl_load_texture_from_image)(Image);
 typedef TextureCubemap (*rl_load_texture_cubemap)(Image, i32);
 typedef RenderTexture2D (*rl_load_render_texture)(i32, i32);
 typedef void (*rl_unload_texture)(Texture2D);
 typedef void (*rl_unload_render_texture)(RenderTexture2D);
-typedef void (*rl_update_texture)(Texture2D, const void*);
-typedef void (*rl_update_texture_rec)(Texture2D, Rectangle, const void*);
-typedef void (*rl_gen_texture_mipmaps)(Texture2D*);
+typedef void (*rl_update_texture)(Texture2D, const void *);
+typedef void (*rl_update_texture_rec)(Texture2D, Rec, const void *);
+typedef void (*rl_gen_texture_mipmaps)(Texture2D *);
 typedef void (*rl_set_texture_filter)(Texture2D, i32);
 typedef void (*rl_set_texture_wrap)(Texture2D, i32);
 typedef void (*rl_draw_texture)(Texture2D, i32, i32, Color);
 typedef void (*rl_draw_texture_v)(Texture2D, Vector2, Color);
 typedef void (*rl_draw_texture_ex)(Texture2D, Vector2, r32, r32, Color);
-typedef void (*rl_draw_texture_rec)(Texture2D, Rectangle, Vector2, Color);
-typedef void (*rl_draw_texture_quad)(Texture2D, Vector2, Vector2, Rectangle, Color);
-typedef void (*rl_draw_texture_tiled)(Texture2D, Rectangle, Rectangle, Vector2, r32, r32, Color);
-typedef void (*rl_draw_texture_pro)(Texture2D, Rectangle, Rectangle, Vector2, r32, Color);
-typedef void (*rl_draw_texture_n_patch)(Texture2D, NPatchInfo, Rectangle, Vector2, r32, Color);
-typedef void (*rl_draw_texture_poly)(Texture2D, Vector2, Vector2*, Vector2*, i32, Color);
+typedef void (*draw_texture_rotated_scaled)(Texture2D, Vector2, Vector2, r32, r32, Color);
+typedef void (*draw_texture_rotated)(Texture2D, Vector2, Vector2, r32, Color);
+typedef void (*rl_draw_texture_rec)(Texture2D, Rec, Vector2, Color);
+typedef void (*rl_draw_texture_quad)(Texture2D, Vector2, Vector2, Rec, Color);
+typedef void (*rl_draw_texture_tiled)(Texture2D, Rec, Rec, Vector2, r32, r32, Color);
+typedef void (*rl_draw_texture_pro)(Texture2D, Rec, Rec, Vector2, r32, Color);
+typedef void (*rl_draw_texture_n_patch)(Texture2D, NPatchInfo, Rec, Vector2, r32, Color);
+typedef void (*rl_draw_texture_poly)(Texture2D, Vector2, Vector2 *, Vector2 *, i32, Color);
 typedef Color (*rl_fade)(Color, r32);
 typedef i32 (*rl_color_to_int)(Color);
 typedef Vector4 (*rl_color_normalize)(Color);
@@ -390,53 +390,53 @@ typedef Color (*rl_color_from_hsv)(r32, r32, r32);
 typedef Color (*rl_color_alpha)(Color, r32);
 typedef Color (*rl_color_alpha_blend)(Color, Color, Color);
 typedef Color (*rl_get_color)(u32);
-typedef Color (*rl_get_pixel_color)(void*, i32);
-typedef void (*rl_set_pixel_color)(void*, Color, i32);
+typedef Color (*rl_get_pixel_color)(void *, i32);
+typedef void (*rl_set_pixel_color)(void *, Color, i32);
 typedef i32 (*rl_get_pixel_data_size)(i32, i32, i32);
 
 // text
 
 typedef Font (*rl_get_font_default)(void);
-typedef Font (*rl_load_font)(const char*);
-typedef Font (*rl_load_font_ex)(const char*, i32, i32*, i32);
+typedef Font (*rl_load_font)(const char *);
+typedef Font (*rl_load_font_ex)(const char *, i32, i32 *, i32);
 typedef Font (*rl_load_font_from_image)(Image, Color, i32);
-typedef Font (*rl_load_font_from_memory)(const char*, const unsigned char*, i32, i32, i32*, i32);
-typedef GlyphInfo *(*rl_load_font_data)(const unsigned char*, i32, i32, i32*, i32, i32);
-typedef Image (*rl_gen_image_font_atlas)(const GlyphInfo*, Rectangle**, i32, i32, i32, i32);
-typedef void (*rl_unload_font_data)(GlyphInfo*, i32);
+typedef Font (*rl_load_font_from_memory)(const char *, const unsigned char *, i32, i32, i32 *, i32);
+typedef GlyphInfo *(*rl_load_font_data)(const unsigned char *, i32, i32, i32 *, i32, i32);
+typedef Image (*rl_gen_image_font_atlas)(const GlyphInfo *, Rec **, i32, i32, i32, i32);
+typedef void (*rl_unload_font_data)(GlyphInfo *, i32);
 typedef void (*rl_unload_font)(Font);
-typedef b32 (*rl_export_font_as_code)(Font, const char*);
+typedef b32 (*rl_export_font_as_code)(Font, const char *);
 typedef void (*rl_draw_fps)(i32, i32);
-typedef void (*rl_draw_text)(const string&, i32, i32, i32, Color);
-typedef void (*rl_draw_text_ex)(Font, const string&, Vector2, r32, r32, Color);
-typedef void (*rl_draw_text_pro)(Font, const string&, Vector2, Vector2, r32, r32, r32, Color);
+typedef void (*rl_draw_text)(const string &, i32, i32, i32, Color);
+typedef void (*rl_draw_text_ex)(Font, const string &, Vector2, r32, r32, Color);
+typedef void (*rl_draw_text_pro)(Font, const string &, Vector2, Vector2, r32, r32, r32, Color);
 typedef void (*rl_draw_text_codepoint)(Font, i32, Vector2, r32, Color);
-typedef void (*rl_draw_text_codepoints)(Font, const i32*, i32, Vector2, r32, r32, Color);
-typedef i32 (*rl_measure_text)(const char*, i32);
-typedef Vector2 (*rl_measure_text_ex)(Font, const char*, r32, r32);
+typedef void (*rl_draw_text_codepoints)(Font, const i32 *, i32, Vector2, r32, r32, Color);
+typedef i32 (*rl_measure_text)(const char *, i32);
+typedef Vector2 (*rl_measure_text_ex)(Font, const char *, r32, r32);
 typedef i32 (*rl_get_glyph_index)(Font, i32);
 typedef GlyphInfo (*rl_get_glyph_info)(Font, i32);
-typedef Rectangle (*rl_get_glyph_atlas_rec)(Font, i32);
-typedef i32 *(*rl_load_codepoints)(const char*, i32*);
-typedef void (*rl_unload_codepoints)(i32*);
-typedef i32 (*rl_get_codepoint_count)(const char*);
-typedef i32 (*rl_get_codepoint)(const char*, i32*);
-typedef const char *(*rl_codepoint_to_utf8)(i32, i32*);
-typedef char *(*rl_text_codepoints_to_utf8)(const i32*, i32);
-typedef i32 (*rl_text_copy)(char*, const char*);
-typedef b32 (*rl_text_is_equal)(const char*, const char*);
-typedef u32 (*rl_text_length)(const char*);
-typedef const char *(*rl_text_subtext)(const char*, i32, i32);
-typedef char *(*rl_text_replace)(char*, const char*, const char*);
-typedef char *(*rl_text_insert)(const char*, const char*, i32);
-typedef const char *(*rl_text_join)(const char**, i32, const char*);
-typedef const char **(*rl_text_split)(const char*, char, i32*);
-typedef void (*rl_text_append)(char*, const char*, i32*);
-typedef i32 (*rl_text_find_index)(const char*, const char*);
-typedef const char *(*rl_text_to_upper)(const char*);
-typedef const char *(*rl_text_to_lower)(const char*);
-typedef const char *(*rl_text_to_pascal)(const char*);
-typedef i32 (*rl_text_to_integer)(const char*);
+typedef Rec (*rl_get_glyph_atlas_rec)(Font, i32);
+typedef i32 *(*rl_load_codepoints)(const char *, i32 *);
+typedef void (*rl_unload_codepoints)(i32 *);
+typedef i32 (*rl_get_codepoint_count)(const char *);
+typedef i32 (*rl_get_codepoint)(const char *, i32 *);
+typedef const char *(*rl_codepoint_to_utf8)(i32, i32 *);
+typedef char *(*rl_text_codepoints_to_utf8)(const i32 *, i32);
+typedef i32 (*rl_text_copy)(char *, const char *);
+typedef b32 (*rl_text_is_equal)(const char *, const char *);
+typedef u32 (*rl_text_length)(const char *);
+typedef const char *(*rl_text_subtext)(const char *, i32, i32);
+typedef char *(*rl_text_replace)(char *, const char *, const char *);
+typedef char *(*rl_text_insert)(const char *, const char *, i32);
+typedef const char *(*rl_text_join)(const char **, i32, const char *);
+typedef const char **(*rl_text_split)(const char *, char, i32 *);
+typedef void (*rl_text_append)(char *, const char *, i32 *);
+typedef i32 (*rl_text_find_index)(const char *, const char *);
+typedef const char *(*rl_text_to_upper)(const char *);
+typedef const char *(*rl_text_to_lower)(const char *);
+typedef const char *(*rl_text_to_pascal)(const char *);
+typedef i32 (*rl_text_to_integer)(const char *);
 
 // models
 
@@ -444,13 +444,13 @@ typedef void (*rl_draw_line_3d)(Vector3, Vector3, Color);
 typedef void (*rl_draw_point_3d)(Vector3, Color);
 typedef void (*rl_draw_circle_3d)(Vector3, r32, Vector3, r32, Color);
 typedef void (*rl_draw_triangle_3d)(Vector3, Vector3, Vector3, Color);
-typedef void (*rl_draw_triangle_strip_3d)(Vector3*, i32, Color);
+typedef void (*rl_draw_triangle_strip_3d)(Vector3 *, i32, Color);
 typedef void (*rl_draw_cube)(Vector3, r32, r32, r32, Color);
 typedef void (*rl_draw_cube_v)(Vector3, Vector3, Color);
 typedef void (*rl_draw_cube_wires)(Vector3, r32, r32, r32, Color);
 typedef void (*rl_draw_cube_wires_v)(Vector3, Vector3, Color);
 typedef void (*rl_draw_cube_texture)(Texture2D, Vector3, r32, r32, r32, Color);
-typedef void (*rl_draw_cube_texture_rec)(Texture2D, Rectangle, Vector3, r32, r32, r32, Color);
+typedef void (*rl_draw_cube_texture_rec)(Texture2D, Rec, Vector3, r32, r32, r32, Color);
 typedef void (*rl_draw_sphere)(Vector3, r32, Color);
 typedef void (*rl_draw_sphere_ex)(Vector3, r32, i32, i32, Color);
 typedef void (*rl_draw_sphere_wires)(Vector3, r32, i32, i32, Color);
@@ -461,7 +461,7 @@ typedef void (*rl_draw_cylinder_wires_ex)(Vector3, Vector3, r32, r32, i32, Color
 typedef void (*rl_draw_plane)(Vector3, Vector2, Color);
 typedef void (*rl_draw_ray)(Ray, Color);
 typedef void (*rl_draw_grid)(i32, r32);
-typedef Model (*rl_load_model)(const char*);
+typedef Model (*rl_load_model)(const char *);
 typedef Model (*rl_load_model_from_mesh)(Mesh);
 typedef void (*rl_unload_model)(Model);
 typedef void (*rl_unload_model_keep_meshes)(Model);
@@ -471,17 +471,17 @@ typedef void (*rl_draw_model_ex)(Model, Vector3, Vector3, r32, Vector3, Color);
 typedef void (*rl_draw_model_wires)(Model, Vector3, r32, Color);
 typedef void (*rl_draw_model_wires_ex)(Model, Vector3, Vector3, r32, Vector3, Color);
 typedef void (*rl_draw_bounding_box)(BoundingBox, Color);
-typedef void (*rl_draw_billboard)(Camera, Texture2D, Vector3, Vector2, Color);
-typedef void (*rl_draw_billboard_rec)(Camera, Texture2D, Rectangle, Vector3, r32, Color);
-typedef void (*rl_draw_billboard_pro)(Camera, Texture2D, Rectangle, Vector3, Vector3, Vector2, Vector2, r32, Color);
-typedef void (*rl_upload_mesh)(Mesh*, b32);
-typedef void (*rl_update_mesh_buffer)(Mesh, i32, const void*, i32, i32);
+typedef void (*rl_draw_billboard)(Camera3D, Texture2D, Vector3, r32, Color);
+typedef void (*rl_draw_billboard_rec)(Camera, Texture2D, Rec, Vector3, Vector2, Color);
+typedef void (*rl_draw_billboard_pro)(Camera, Texture2D, Rec, Vector3, Vector3, Vector2, Vector2, r32, Color);
+typedef void (*rl_upload_mesh)(Mesh *, b32);
+typedef void (*rl_update_mesh_buffer)(Mesh, i32, const void *, i32, i32);
 typedef void (*rl_unload_mesh)(Mesh);
 typedef void (*rl_draw_mesh)(Mesh, Material, Matrix);
-typedef void (*rl_draw_mesh_instanced)(Mesh, Material, const Matrix*, i32);
-typedef b32 (*rl_export_mesh)(Mesh, const char*);
+typedef void (*rl_draw_mesh_instanced)(Mesh, Material, const Matrix *, i32);
+typedef b32 (*rl_export_mesh)(Mesh, const char *);
 typedef BoundingBox (*rl_get_mesh_bounding_box)(Mesh);
-typedef void (*rl_get_mesh_tangents)(Mesh*);
+typedef void (*rl_get_mesh_tangents)(Mesh *);
 typedef Mesh (*rl_gen_mesh_poly)(i32, r32);
 typedef Mesh (*rl_get_mesh_plane)(r32, r32, i32, i32);
 typedef Mesh (*rl_gen_mesh_cube)(r32, r32, r32);
@@ -493,15 +493,15 @@ typedef Mesh (*rl_gen_mesh_torus)(r32, r32, i32, i32);
 typedef Mesh (*rl_gen_mesh_knot)(r32, r32, i32, i32);
 typedef Mesh (*rl_gen_mesh_heightmap)(Image, Vector3);
 typedef Mesh (*rl_gen_mesh_cubicmap)(Image, Vector3);
-typedef Material *(*rl_load_materials)(const char*, i32*);
+typedef Material *(*rl_load_materials)(const char *, i32 *);
 typedef Material (*rl_load_material_default)(void);
 typedef void (*rl_unload_material)(Material);
-typedef void (*rl_set_material_texture)(Material*, i32, Texture2D);
-typedef void (*rl_set_model_mesh_material)(Model*, i32, i32);
-typedef ModelAnimation *(*rl_load_model_animations)(const char*, u32*);
+typedef void (*rl_set_material_texture)(Material *, i32, Texture2D);
+typedef void (*rl_set_model_mesh_material)(Model *, i32, i32);
+typedef ModelAnimation *(*rl_load_model_animations)(const char *, u32 *);
 typedef void (*rl_update_model_animation)(Model, ModelAnimation, i32);
 typedef void (*rl_unload_model_animation)(ModelAnimation);
-typedef void (*rl_unload_model_animations)(ModelAnimation*, u32);
+typedef void (*rl_unload_model_animations)(ModelAnimation *, u32);
 typedef b32 (*rl_is_model_animation_valid)(Model, ModelAnimation);
 typedef b32 (*rl_check_collision_spheres)(Vector3, r32, Vector3, r32);
 typedef b32 (*rl_check_collision_boxes)(BoundingBox, BoundingBox);
@@ -518,15 +518,15 @@ typedef void (*rl_init_audio_device)(void);
 typedef void (*rl_close_audio_device)(void);
 typedef b32 (*rl_is_audio_device_ready)(void);
 typedef void (*rl_set_master_volume)(r32);
-typedef Wave (*rl_load_wave)(const char*);
-typedef Wave (*rl_load_wave_from_memory)(const char*, const unsigned char*, i32);
-typedef Sound (*rl_load_sound)(const char*);
+typedef Wave (*rl_load_wave)(const char *);
+typedef Wave (*rl_load_wave_from_memory)(const char *, const unsigned char *, i32);
+typedef Sound (*rl_load_sound)(const char *);
 typedef Sound (*rl_load_sound_from_wave)(Wave);
-typedef void (*rl_update_sound)(Sound, const void*, i32);
+typedef void (*rl_update_sound)(Sound, const void *, i32);
 typedef void (*rl_unload_wave)(Wave);
 typedef void (*rl_unload_sound)(Sound);
-typedef b32 (*rl_export_wave)(Wave, const char*);
-typedef b32 (*rl_export_wave_as_code);
+typedef b32 (*rl_export_wave)(Wave, const char *);
+typedef b32(*rl_export_wave_as_code)(Wave, const char*);
 typedef void (*rl_play_sound)(Sound);
 typedef void (*rl_stop_sound)(Sound);
 typedef void (*rl_pause_sound)(Sound);
@@ -539,12 +539,12 @@ typedef void (*rl_set_sound_volume)(Sound, r32);
 typedef void (*rl_set_sound_pitch)(Sound, r32);
 typedef void (*rl_set_sound_pan)(Sound, r32);
 typedef Wave (*rl_wave_copy)(Wave);
-typedef void (*rl_wave_crop)(Wave*, i32, i32);
-typedef void (*rl_wave_format)(Wave*, i32, i32, i32);
+typedef void (*rl_wave_crop)(Wave *, i32, i32);
+typedef void (*rl_wave_format)(Wave *, i32, i32, i32);
 typedef r32 *(*rl_load_wave_samples)(Wave);
-typedef void (*rl_unload_wave_samples)(r32*);
-typedef Music (*rl_load_music_stream)(const char*);
-typedef Music (*rl_load_music_stream_from_memory)(const char*, const unsigned char*, i32);
+typedef void (*rl_unload_wave_samples)(r32 *);
+typedef Music (*rl_load_music_stream)(const char *);
+typedef Music (*rl_load_music_stream_from_memory)(const char *, const unsigned char *, i32);
 typedef void (*rl_unload_music_stream)(Music);
 typedef void (*rl_play_music_stream)(Music);
 typedef b32 (*rl_is_music_stream_playing)(Music);
@@ -560,7 +560,7 @@ typedef r32 (*rl_get_music_time_length)(Music);
 typedef r32 (*rl_get_music_time_played)(Music);
 typedef AudioStream (*rl_load_audio_stream)(u32, u32, u32);
 typedef void (*rl_unload_audio_stream)(AudioStream);
-typedef void (*rl_update_audio_stream)(AudioStream, const void*, i32);
+typedef void (*rl_update_audio_stream)(AudioStream, const void *, i32);
 typedef b32 (*rl_is_audio_stream_processed)(AudioStream);
 typedef void (*rl_play_audio_stream)(AudioStream);
 typedef void (*rl_pause_audio_stream)(AudioStream);
@@ -577,7 +577,6 @@ typedef void (*rl_detach_audio_stream_processor)(AudioStream, AudioCallback);
 
 struct raylib_wrapper_code
 {
-    debug_print_cycle_counters DebugPrintCycleCounters;
     rl_init_window InitWindow;
     rl_window_should_close WindowShouldClose;
     rl_close_window CloseWindow;
@@ -789,7 +788,9 @@ struct raylib_wrapper_code
     rl_draw_rectange_rounded DrawRectangleRounded;
     rl_draw_rectangle_bounded_lines DrawRectangleRoundedLines;
     rl_draw_triangle DrawTriangle;
+    draw_triangle_rotated DrawTriangleRotated;
     rl_draw_triangle_lines DrawTriangleLines;
+    draw_triangle_lines_rotated DrawTriangleLinesRotated;
     rl_draw_triangle_fan DrawTriangleFan;
     rl_draw_triangle_strip DrawTriangleStrip;
     rl_draw_poly DrawPoly;
@@ -880,6 +881,8 @@ struct raylib_wrapper_code
     rl_draw_texture DrawTexture;
     rl_draw_texture_v DrawTextureV;
     rl_draw_texture_ex DrawTextureEx;
+    draw_texture_rotated_scaled DrawTextureRotatedScaled;
+    draw_texture_rotated DrawTextureRotated;
     rl_draw_texture_rec DrawTextureRec;
     rl_draw_texture_quad DrawTextureQuad;
     rl_draw_texture_tiled DrawTextureTiled;

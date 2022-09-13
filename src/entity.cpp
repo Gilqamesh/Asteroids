@@ -73,14 +73,23 @@ AddShipEntity(game_state *GameState, game_window *GameWindow)
     Result->WrapSize.x = 30.0f;
     Result->WrapSize.y = 22.0f;
     Result->Type = EntityType_Ship;
-    Result->RotationSpeed = 0.10f;
-    Result->RotationJaw = -PI / 2;
+    Result->RotationJaw = -PI / 2.0f;
+    Result->dRotationJawMax = 0.10f;
     Result->FacingDirection = {};
     Result->texture = GameState->Textures[Texture_Ship].t;
-    Result->ColliderType = Collider_Triangle;
-    Result->Points[0] = {-19.0f, -22.0f};
-    Result->Points[1] = {30.0f, 0.0f};
-    Result->Points[2] = {-20.0f, 22.0f};
+    Result->Collides = true;
+    Result->ColliderType = Collider_Polygon;
+    Result->Collider.Points[0] = {-19.0f, -22.0f};
+    Result->Collider.Points[1] = {30.0f, 0.0f};
+    Result->Collider.Points[2] = {-20.0f, 22.0f};
+    Result->Collider.Size = 3;
+    for (u32 i = 0;
+         i < Result->Collider.Size;
+         ++i)
+    {
+        Result->Collider.Points[i] += Result->P;
+        Result->Collider.Points[i] = VectorRotate(Result->Collider.Points[i], Result->P, Result->RotationJaw);
+    }
     Result->Tint = BLUE;
     Result->Scale = 1.0f;
     Result->MaxBullets = 3;
@@ -102,6 +111,7 @@ AddRockEntity(game_state *GameState, game_window *GameWindow, entity_type Entity
     Result->P.y = ((GetRand(0, 1) & 1) ? GetRand(0.0f, 2.0f * (r32)GameWindow->Height / 5.0f) : GetRand(3.0f * (r32)GameWindow->Height / 5.0f, (r32)GameWindow->Height));
     Result->FacingDirection = { GetRand(-1.0f, 1.0f), GetRand(-1.0f, 1.0f) };
     Result->FacingDirection = VectorNormalize(Result->FacingDirection);
+    Result->Collides = true;
     Result->ColliderType = Collider_Circle;
     Result->Scale = 1.0f;
     switch (EntityType)
@@ -112,7 +122,7 @@ AddRockEntity(game_state *GameState, game_window *GameWindow, entity_type Entity
             Result->dP.y = Result->FacingDirection.y * 100.0f;
             Result->Radius = 50.0f;
             Result->WrapSize = { 50.0f, 50.0f };
-            Result->RotationSpeed = GetRand(-0.025f, 0.025f);
+            Result->dRotationJaw = (GetRand(0, 1) & 1 ? GetRand(-0.035f, -0.025f) : GetRand(0.025f, 0.035f));
             Result->texture = GameState->Textures[Texture_RockBig].t;
             Result->Score = 20;
             Result->Tint = {170, 170, 170, 255};
@@ -123,7 +133,7 @@ AddRockEntity(game_state *GameState, game_window *GameWindow, entity_type Entity
             Result->dP.y = Result->FacingDirection.y * 175.0f;
             Result->Radius = 30.0f;
             Result->WrapSize = { 30.0f, 30.0f };
-            Result->RotationSpeed = GetRand(-0.05f, 0.05f);
+            Result->dRotationJaw = (GetRand(0, 1) & 1 ? GetRand(-0.065f, -0.05f) : GetRand(0.05f, 0.065f));
             Result->texture = GameState->Textures[Texture_RockMedium].t;
             Result->Score = 50;
             Result->Tint = {130, 130, 130, 255};
@@ -134,7 +144,8 @@ AddRockEntity(game_state *GameState, game_window *GameWindow, entity_type Entity
             Result->dP.y = Result->FacingDirection.y * 225.0f;
             Result->Radius = 15.0f;
             Result->WrapSize = { 15.0f, 15.0f };
-            Result->RotationSpeed = GetRand(-0.1f, 0.1f);
+            Result->dRotationJaw = (GetRand(0, 1) & 1 ? GetRand(-0.1f, -0.85f) : GetRand(0.85f, 0.1f));
+            Result->dRotationJaw = GetRand(-0.1f, 0.1f);
             Result->texture = GameState->Textures[Texture_RockSmall].t;
             Result->Score = 100;
             Result->Tint = {100, 100, 100, 255};
@@ -185,27 +196,43 @@ SplitRock(game_state *GameState, game_window *GameWindow, entity *Entity)
 internal inline entity*
 AddBulletEntity(game_state *GameState, game_window *GameWindow, entity *Source, Vector2 BulletDirection, Color Tint = WHITE)
 {
-    ASSERT(Source->Bullets < Source->MaxBullets);
-    ++Source->Bullets;
-    entity *Result = AddEntity(GameState->World);
-    ASSERT(Result);
+    entity *Result = 0;
+    if (Source->Bullets < Source->MaxBullets)
+    {
+        ++Source->Bullets;
+        Result = AddEntity(GameState->World);
+        ASSERT(Result);
 
-    Result->Parent = Source;
-    Result->ParentType = Source->Type;
-    Result->Type = EntityType_Bullet;
-    Result->P = Source->P;
-    Result->FacingDirection = BulletDirection;
-    Result->RotationJaw = atan2(Result->FacingDirection.x, -Result->FacingDirection.y);
-    Result->dP.x = Result->FacingDirection.x * 700.0f;
-    Result->dP.y = Result->FacingDirection.y * 700.0f;
-    Result->ColliderType = Collider_Rec;
-    Result->WrapSize = { 3.0f, 13.0f };
-    Result->Radius = 3.0f;
-    Result->texture = GameState->Textures[Texture_Bullet].t;
-    Result->HasDistanceRemaining = true;
-    Result->DistanceRemaining = 600.0f;
-    Result->Tint = Tint;
-    Result->Scale = 1.0f;
+        Result->Parent = Source;
+        Result->ParentType = Source->Type;
+        Result->Type = EntityType_Bullet;
+        Result->P = Source->P;
+        Result->FacingDirection = BulletDirection;
+        Result->RotationJaw = atan2(Result->FacingDirection.x, -Result->FacingDirection.y);
+        Result->dP.x = Result->FacingDirection.x * 700.0f;
+        Result->dP.y = Result->FacingDirection.y * 700.0f;
+        Result->Collides = true;
+        Result->ColliderType = Collider_Polygon;
+        Result->Collider.Points[0] = { -1.0f, -5.0f };
+        Result->Collider.Points[1] = { 1.0f, -5.0f };
+        Result->Collider.Points[2] = { -1.0f, 5.0f };
+        Result->Collider.Points[3] = { 1.0f, 5.0f };
+        Result->Collider.Size = 4;
+        for (u32 i = 0;
+            i < Result->Collider.Size;
+            ++i)
+        {
+            Result->Collider.Points[i] += Result->P;
+            Result->Collider.Points[i] = VectorRotate(Result->Collider.Points[i], Result->P, Result->RotationJaw);
+        }
+        Result->WrapSize = { 3.0f, 13.0f };
+        Result->Radius = 3.0f;
+        Result->texture = GameState->Textures[Texture_Bullet].t;
+        Result->HasDistanceRemaining = true;
+        Result->DistanceRemaining = 600.0f;
+        Result->Tint = Tint;
+        Result->Scale = 1.0f;
+    }
 
     return (Result);
 }
@@ -237,6 +264,7 @@ AddParticleEntity(game_state *GameState, Vector2 P, r32 DistanceRemaining = 100.
     Result->texture = GameState->Textures[Texture_Particle].t;
     Result->HasDistanceRemaining = true;
     Result->DistanceRemaining = DistanceRemaining;
+    Result->Collides = false;
     Result->Tint = Tint;
     Result->ChangesTint = true;
     Result->TintChange = { 0, 0, 0, 1 };
@@ -261,6 +289,21 @@ AddUfoEntity(game_state* GameState, game_window *GameWindow)
     Result->dP = { SpawnsLeft ? 150.0f : -150.0f };
     Result->Scale = 1.0f;
     Result->MaxBullets = 5;
+    Result->ColliderType = Collider_Polygon;
+    Result->Collider.Points[0] = { -29.0f, 0.0f };
+    Result->Collider.Points[1] = { -12.0f, -18.0f };
+    Result->Collider.Points[2] = { 12.0f, -18.0f };
+    Result->Collider.Points[3] = { 29.0f, 0.0f };
+    Result->Collider.Points[4] = { 20.0f, 8.0f };
+    Result->Collider.Points[5] = { -20.0f, 8.0f };
+    Result->Collider.Size = 6;
+    for (u32 i = 0;
+         i < Result->Collider.Size;
+         ++i)
+    {
+        Result->Collider.Points[i] += Result->P;
+        Result->Collider.Points[i] = VectorRotate(Result->Collider.Points[i], Result->P, Result->RotationJaw);
+    }
     Result->Radius = 30.0f;
     Result->Score = 200;
 
@@ -352,7 +395,9 @@ COLLISION_HANDLER(BulletVsRock)
     }
     ASSERT(Bullet->Type == EntityType_Bullet);
     ASSERT(IsEntityRockType(Rock));
-    if (CircleVsCircle(Bullet->P, Bullet->Radius, Rock->P, Rock->Radius))
+    polygon ExtendedPolygon = ExtendPolygon(&Bullet->Collider, (Bullet->dP - Rock->dP) * GameState->dt);
+    if (PolyVsCircle(&ExtendedPolygon, Rock->P, Rock->Radius))
+    // if (CircleVsCircle(Bullet->P, Bullet->Radius, Rock->P, Rock->Radius))
     {
         if (Bullet->ParentType == EntityType_Ship)
         {
@@ -383,7 +428,11 @@ COLLISION_HANDLER(RockVsShip)
     }
     ASSERT(IsEntityRockType(Rock));
     ASSERT(Ship->Type == EntityType_Ship);
-    if (CircleVsTriangle(Rock->P, Rock->Radius, Ship->Points[0] + Ship->P, Ship->Points[1] + Ship->P, Ship->Points[2] + Ship->P, Ship->P, Ship->RotationJaw))
+    // extend polygon's size
+    polygon ExtendedPolygon = ExtendPolygon(&Ship->Collider, (Ship->dP - Rock->dP) * GameState->dt);
+    RL->DrawLineStrip(ExtendedPolygon.Points, ExtendedPolygon.Size, GREEN);
+    if (PolyVsCircle(&Ship->Collider, Rock->P, Rock->Radius))
+    // if (CircleVsTriangle(Rock->P, Rock->Radius, Ship->Points[0] + Ship->P, Ship->Points[1] + Ship->P, Ship->Points[2] + Ship->P, Ship->P, Ship->RotationJaw))
     {
         u32 NumberOfParticles = 20;
         for (u32 ParticleIndex = 0;
@@ -411,7 +460,10 @@ COLLISION_HANDLER(BulletVsShip)
     }
     ASSERT(Bullet->Type == EntityType_Bullet);
     ASSERT(Ship->Type == EntityType_Ship);
-    if (Bullet->Parent != Ship && CircleVsTriangle(Bullet->P, Bullet->Radius, Ship->Points[0] + Ship->P, Ship->Points[1] + Ship->P, Ship->Points[2] + Ship->P, Ship->P, Ship->RotationJaw))
+    polygon ExtendedPolygon = ExtendPolygon(&Ship->Collider, (Ship->dP - Bullet->dP) * GameState->dt);
+    if (Bullet->Parent != Ship && PolyVsPoly(&ExtendedPolygon, &Bullet->Collider))
+    // if (Bullet->Parent != Ship && PolyVsCircle(&ExtendedPolygon, Bullet->P, Bullet->Radius))
+    // if (Bullet->Parent != Ship && CircleVsTriangle(Bullet->P, Bullet->Radius, Ship->Points[0] + Ship->P, Ship->Points[1] + Ship->P, Ship->Points[2] + Ship->P, Ship->P, Ship->RotationJaw))
     {
         u32 NumberOfParticles = 20;
         for (u32 ParticleIndex = 0;
@@ -438,7 +490,9 @@ COLLISION_HANDLER(BulletVsUfo)
     }
     ASSERT(Bullet->Type == EntityType_Bullet);
     ASSERT(Ufo->Type == EntityType_Ufo);
-    if (Bullet->ParentType != EntityType_Ufo && CircleVsCircle(Bullet->P, Bullet->Radius, Ufo->P, Ufo->Radius))
+    polygon ExtendedPolygon = ExtendPolygon(&Bullet->Collider, (Bullet->dP - Ufo->dP) * GameState->dt);
+    if (Bullet->ParentType != EntityType_Ufo && PolyVsPoly(&ExtendedPolygon, &Ufo->Collider))
+    // if (Bullet->ParentType != EntityType_Ufo && CircleVsCircle(Bullet->P, Bullet->Radius, Ufo->P, Ufo->Radius))
     {
         AddScore(GameState, Ufo->Score);
         u32 NumberOfParticles = 20;
@@ -473,7 +527,9 @@ COLLISION_HANDLER(ShipVsUfo)
     }
     ASSERT(Ship->Type == EntityType_Ship);
     ASSERT(Ufo->Type == EntityType_Ufo);
-    if (CircleVsTriangle(Ufo->P, Ufo->Radius, Ship->Points[0] + Ship->P, Ship->Points[1] + Ship->P, Ship->Points[2] + Ship->P, Ship->P, Ship->RotationJaw))
+    polygon ExtendedPolygon = ExtendPolygon(&Ship->Collider, (Ship->dP - Ufo->dP) * GameState->dt);
+    if (PolyVsPoly(&ExtendedPolygon, &Ufo->Collider))
+    // if (CircleVsTriangle(Ufo->P, Ufo->Radius, Ship->Points[0] + Ship->P, Ship->Points[1] + Ship->P, Ship->Points[2] + Ship->P, Ship->P, Ship->RotationJaw))
     {
         u32 NumberOfParticles = 20;
         for (u32 ParticleIndex = 0;

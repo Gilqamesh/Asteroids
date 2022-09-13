@@ -3,7 +3,7 @@
 #include "types.hpp"
 #include "misc.hpp"
 #include <cmath>
-#include "utils.cpp"
+#include "math.cpp"
 #include "ui.cpp"
 #include "event.cpp"
 #include "entity.cpp"
@@ -66,10 +66,11 @@ ResetGameState(game_state *GameState, game_window *GameWindow, raylib_wrapper_co
     {
         AddRockEntity(GameState, GameWindow, EntityType_RockBig);
     }
+    GameState->TimedEventHeapSize = 0;
     GameState->Ship = AddShipEntity(GameState, GameWindow);
     GameState->ShipLifes = 3;
     GameState->PlayScore = 0;
-    GameState->UfoSpawnTargetGameTick = GameState->GameTicks + 20 * GameState->TargetFPS;
+    GameState->UfoSpawnTargetGameTick = GameState->GameTicks + 5 * GameState->TargetFPS;
     PushTimedEvent(GameState, GameState->UfoSpawnTargetGameTick, [](game_state *GameState, game_window *GameWindow, raylib_wrapper_code *RL){
         GameState->Ufo = AddUfoEntity(GameState, GameWindow);
     }, TimedEvent_Ufo);
@@ -220,7 +221,8 @@ extern "C"
         AddCollisionRule(GameState, EntityType_Bullet, EntityType_Ufo, &BulletVsUfo);
         AddCollisionRule(GameState, EntityType_Ship, EntityType_Ufo, &ShipVsUfo);
 
-        GameState->ScreenState = Screen_Splash;
+        // GameState->ScreenState = Screen_Splash;
+        GameState->ScreenState = Screen_MainMenu;
     }
 
     void UpdateAndRender(game_memory *GameMemory, game_window *GameWindow)
@@ -229,8 +231,36 @@ extern "C"
         world *World = GameState->World;
         raylib_wrapper_code *RL = &GameMemory->RaylibWrapper;
 
-        r32 dt = RL->GetFrameTime();
+        GameState->dt = RL->GetFrameTime();
         Vector2 MousePosition = RL->GetMousePosition();
+
+        //
+        // NOTE(david): main timed events processing
+        //
+        b32 GlobalEvent = true;
+        while (GlobalEvent && GameState->TimedEventHeapSize && GameState->FrameCounter == GameState->TimedEventHeap[0].Target)
+        {
+            timed_event Event = PeakTimedEvent(GameState);
+
+            switch (Event.Type)
+            {
+                case TimedEvent_SplashScreenSound:
+                {
+                    PopTimedEvent(GameState);
+                    GameState->CustomData = Event.CustomData;
+                    Event.Handler(GameState, GameWindow, RL);
+                } break ;
+                case TimedEvent_SplashToMain:
+                {
+                    PopTimedEvent(GameState);
+                    Event.Handler(GameState, GameWindow, RL);
+                } break ;
+                default:
+                {
+                    GlobalEvent = false;
+                } break ;
+            }
+        }
 
         //
         // NOTE(david): game state dispatching
@@ -332,6 +362,9 @@ extern "C"
                     GameState->IsPaused ^= 1;
                 }
 
+                //
+                // NOTE(david): Control of ship and some control of sound and some flow control of the game?
+                //
                 if (!GameState->IsPaused)
                 {
                     ++GameState->GameTicks;
@@ -375,24 +408,24 @@ extern "C"
                         Vector2 P = GameState->Ship->FacingDirection;
                         if (M.x * P.y < M.y * P.x)
                         {
-                            if (GameState->Ship->RotationSpeed > dRotationJaw)
+                            if (GameState->Ship->dRotationJawMax > dRotationJaw)
                             {
-                                GameState->Ship->RotationJaw += dRotationJaw;
+                                GameState->Ship->dRotationJaw = dRotationJaw;
                             }
                             else
                             {
-                                GameState->Ship->RotationJaw += GameState->Ship->RotationSpeed;
+                                GameState->Ship->dRotationJaw = GameState->Ship->dRotationJawMax;
                             }
                         }
                         else
                         {
-                            if (GameState->Ship->RotationSpeed > dRotationJaw)
+                            if (GameState->Ship->dRotationJawMax > dRotationJaw)
                             {
-                                GameState->Ship->RotationJaw -= dRotationJaw;
+                                GameState->Ship->dRotationJaw = -dRotationJaw;
                             }
                             else
                             {
-                                GameState->Ship->RotationJaw -= GameState->Ship->RotationSpeed;
+                                GameState->Ship->dRotationJaw = -GameState->Ship->dRotationJawMax;
                             }
                         }
                     }
@@ -465,6 +498,30 @@ extern "C"
                         case TimedEvent_Ufo:
                         {
                             Event.Handler(GameState, GameWindow, RL);
+                            PushTimedEvent(GameState, GameState->GameTicks + 20, [](game_state *GameState, game_window *GameWindow, raylib_wrapper_code *RL){
+                                if (GameState->Ufo)
+                                {
+                                    if (GameState->Ship)
+                                    {
+                                        Vector2 BulletDirection = GameState->Ship->P - GameState->Ufo->P;
+                                        BulletDirection = VectorRotate(BulletDirection, {}, GetRand(-0.7f, 0.7f));
+                                        AddBulletEntity(GameState, GameWindow, GameState->Ufo, VectorNormalize(BulletDirection), RED);
+                                    }
+                                    GameState->CustomData = 20;
+                                }
+                                else
+                                {
+                                    GameState->CustomData = 0;
+                                }
+                            }, TimedEvent_Repeated, 20);
+                        } break ;
+                        case TimedEvent_Repeated:
+                        {
+                            Event.Handler(GameState, GameWindow, RL);
+                            if (Event.CustomData)
+                            {
+                                PushTimedEvent(GameState, GameState->GameTicks + Event.CustomData, Event.Handler, Event.Type, Event.CustomData);
+                            }
                         } break ;
                         default: ASSERT(false);
                     }
@@ -473,6 +530,7 @@ extern "C"
                 //
                 // NOTE(david): Collision
                 //
+                RL->BeginTextureMode(GameState->Render_Overlay);
                 for (u32 EntityId = 0;
                     EntityId < World->EntitiesSize;
                     ++EntityId)
@@ -500,7 +558,7 @@ extern "C"
                 //
                 // NOTE(david): Overlay
                 //
-                RL->BeginTextureMode(GameState->Render_Overlay);
+                // RL->BeginTextureMode(GameState->Render_Overlay);
                 if (GameState->IsPaused)
                 {
                     RL->ClearBackground({ 120, 120, 120, 100 });
@@ -548,7 +606,6 @@ extern "C"
                                 } break ;
                                 case EntityType_RockBig: case EntityType_RockMedium: case EntityType_RockSmall:
                                 {
-                                    Entity->RotationJaw += Entity->RotationSpeed;
                                 } break ;
                                 case EntityType_Ship:
                                 {
@@ -558,12 +615,6 @@ extern "C"
                                 } break ;
                                 case EntityType_Ufo:
                                 {
-                                    if (GameState->Ship && Entity->Bullets < Entity->MaxBullets && (GameState->FrameCounter & (32 - 1)) == 0)
-                                    {
-                                        Vector2 BulletDirection = GameState->Ship->P - Entity->P;
-                                        BulletDirection = VectorRotate(BulletDirection, {}, GetRand(-0.7f, 0.7f));
-                                        AddBulletEntity(GameState, GameWindow, Entity, VectorNormalize(BulletDirection), RED);
-                                    }
                                 } break ;
                                 default: ASSERT(false);
                             }
@@ -577,11 +628,19 @@ extern "C"
                                 {
                                     Entity->Scale *= Entity->ScaleChangeRatio;
                                 }
-                                MoveEntity(GameState, Entity, GameWindow, dt);
+                                MoveEntity(GameState, Entity, GameWindow);
                             }
                         }
                         if (Entity->IsAlive)
                         {
+                            // if (Entity->ColliderType == Collider_Polygon)
+                            // {
+                            //     RL->DrawLineStrip(Entity->Collider.Points, Entity->Collider.Size, RED);
+                            // }
+                            // if (Entity->ColliderType == Collider_Circle)
+                            // {
+                            //     RL->DrawCircleLines(Entity->P.x, Entity->P.y, Entity->Radius, RED);
+                            // }
                             RL->DrawTextureRotatedScaled(Entity->texture,
                                 { Entity->P.x - (r32)Entity->texture.width / 2.0f,
                                 Entity->P.y - (r32)Entity->texture.height / 2.0f },
@@ -638,28 +697,6 @@ extern "C"
         }
 
         ++GameState->FrameCounter;
-
-        //
-        // NOTE(david): main timed events processing
-        //
-        while (GameState->TimedEventHeapSize && GameState->FrameCounter == GameState->TimedEventHeap[0].Target)
-        {
-            timed_event Event = PopTimedEvent(GameState);
-
-            switch (Event.Type)
-            {
-                case TimedEvent_SplashScreenSound:
-                {
-                    GameState->CustomData = Event.CustomData;
-                    Event.Handler(GameState, GameWindow, RL);
-                } break ;
-                case TimedEvent_SplashToMain:
-                {
-                    Event.Handler(GameState, GameWindow, RL);
-                } break ;
-                default: ASSERT(false);
-            }
-        }
 
         if (RL->WindowShouldClose())
         {

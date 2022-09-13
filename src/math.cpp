@@ -74,6 +74,15 @@ operator*(r32 X, Vector2 V)
     return (V);
 }
 
+internal inline Vector2
+operator/(Vector2 V, r32 X)
+{
+    V.x /= X;
+    V.y /= X;
+
+    return (V);
+}
+
 internal inline Vector2 &
 operator *= (r32 X, Vector2 &V)
 {
@@ -213,6 +222,16 @@ VectorClamp(Vector2 Vec, r32 Min, r32 Max)
     return (Vec);
 }
 
+internal inline Vector2
+VectorNormal(Vector2 Vec)
+{
+    r32 Tmp = Vec.x;
+    Vec.x = -Vec.y;
+    Vec.y = Tmp;
+
+    return (Vec);
+}
+
 internal inline Color
 ColorClamp(Color color, u32 Min, u32 Max)
 {
@@ -341,4 +360,195 @@ CircleVsTriangle(Vector2 O, r32 Radius, Vector2 A, Vector2 B, Vector2 C, Vector2
     }
 
     return (false);
+}
+
+internal b32
+PolyVsPoly(polygon *PolygonA, polygon *PolygonB, Vector2 *MinimumTranslationVectorA = 0)
+{
+    u32 NumberOfNormals = PolygonA->Size + PolygonB->Size;
+    r32 MinOverlap;
+    Vector2 MinOverlapDirectionA = {};
+    for (u32 NormalIndex = 0;
+         NormalIndex < NumberOfNormals;
+         ++NormalIndex)
+    {
+        Vector2 Normal;
+        if (NormalIndex < PolygonA->Size - 1)
+        {
+            Normal = VectorNormal(PolygonA->Points[NormalIndex + 1] - PolygonA->Points[NormalIndex]);
+        }
+        else if (NormalIndex == PolygonA->Size - 1)
+        {
+            Normal = VectorNormal(PolygonA->Points[0] - PolygonA->Points[NormalIndex]);
+        }
+        else if (NormalIndex - PolygonA->Size < PolygonB->Size - 1)
+        {
+            Normal = VectorNormal(PolygonB->Points[NormalIndex - PolygonA->Size + 1] - PolygonB->Points[NormalIndex - PolygonA->Size]);
+        }
+        else if (NormalIndex - PolygonA->Size == PolygonB->Size - 1)
+        {
+            Normal = VectorNormal(PolygonB->Points[0] - PolygonB->Points[NormalIndex - PolygonA->Size]);
+        }
+        else
+        {
+            ASSERT(false);
+        }
+
+        // get min and max projections from A onto the normal
+        r32 MinProjectionA = Inner(PolygonA->Points[0], Normal);
+        r32 MaxProjectionA = MinProjectionA;
+        for (u32 i = 1;
+             i < PolygonA->Size;
+             ++i)
+        {
+            r32 CurrentProj = Inner(PolygonA->Points[i], Normal);
+            if (CurrentProj < MinProjectionA) MinProjectionA = CurrentProj;
+            if (CurrentProj > MaxProjectionA) MaxProjectionA = CurrentProj;
+        }
+
+        // get min and max projections from B onto the normal
+        r32 MinProjectionB = Inner(PolygonB->Points[0], Normal);
+        r32 MaxProjectionB = MinProjectionB;
+        for (u32 i = 1;
+             i < PolygonB->Size;
+             ++i)
+        {
+            r32 CurrentProj = Inner(PolygonB->Points[i], Normal);
+            if (CurrentProj < MinProjectionB) MinProjectionB = CurrentProj;
+            if (CurrentProj > MaxProjectionB) MaxProjectionB = CurrentProj;
+        }
+
+        // if there is a gap in between the intervals, then the two polygons are not overlapped
+        if (!((MinProjectionA < MaxProjectionB && MinProjectionA > MinProjectionB) ||
+             (MinProjectionB < MaxProjectionA && MinProjectionB > MinProjectionA)))
+        {
+            return (false);
+        }
+        if (MinimumTranslationVectorA)
+        {
+            float Overlap = min(abs(MaxProjectionA - MinProjectionB), abs(MaxProjectionB - MinProjectionA));
+
+            // update minimum overlap for mtv
+            if (NormalIndex == 0)
+            {
+                MinOverlap = Overlap;
+                MinOverlapDirectionA = Normal;
+            }
+            else if (Overlap < MinOverlap)
+            {
+                MinOverlap = Overlap;
+                MinOverlapDirectionA = Normal;
+            }
+        }
+    }
+
+    MinOverlapDirectionA = VectorNormalize(MinOverlapDirectionA);
+    MinOverlapDirectionA *= MinOverlap;
+    if (MinimumTranslationVectorA)
+    {
+        Vector2 MidPointA = {};
+        Vector2 MidPointB = {};
+        for (u32 i = 0;
+            i < PolygonA->Size;
+            ++i)
+        {
+            MidPointA = MidPointA + PolygonA->Points[i];
+        }
+        MidPointA = MidPointA / (r32)PolygonA->Size;
+        for (u32 i = 0;
+            i < PolygonB->Size;
+            ++i)
+        {
+            MidPointB = MidPointB + PolygonB->Points[i];
+        }
+        MidPointB = MidPointB / (r32)PolygonB->Size;
+        Vector2 AB = MidPointB - MidPointA;
+
+        MinOverlapDirectionA = MinOverlapDirectionA * MinOverlap;
+        r32 OverlapDir = Inner(MinOverlapDirectionA, AB);
+        if (OverlapDir > 0.0f)
+        {
+            MinOverlapDirectionA = -MinOverlapDirectionA;
+        }
+        *MinimumTranslationVectorA = MinOverlapDirectionA;
+    }
+    // there was an intersection in all intervals
+    return (true);
+}
+
+bool
+PolyVsCircle(polygon *Polygon, Vector2 Origin, r32 Radius)
+{
+    for (int PointIndex = 0;
+         PointIndex < Polygon->Size;
+         ++PointIndex)
+    {
+        if (Inner(Polygon->Points[PointIndex] - Origin, Polygon->Points[PointIndex] - Origin) < Radius * Radius)
+        {
+            return (true);
+        }
+    }
+
+    return (false);
+}
+
+polygon
+ExtendPolygon(polygon *Original, Vector2 Direction)
+{
+    polygon Result = {};
+
+    polygon Extended = {};
+    for (u32 i = 0;
+         i < Original->Size;
+         ++i)
+    {
+        Extended.Points[i] = Original->Points[i] + Direction;
+    }
+
+    Vector2 Normal = VectorNormal(Direction);
+
+    i32 MinIndex = 0;
+    i32 MaxIndex = 0;
+    r32 Min = Inner(Original->Points[0], Normal);
+    r32 Max = Min;
+    for (u32 i = 1;
+         i < Original->Size;
+         ++i)
+    {
+        r32 Proj = Inner(Original->Points[i], Normal);
+        if (Proj < Min)
+        {
+            Min = Proj;
+            MinIndex = i;
+        }
+        if (Proj > Max)
+        {
+            Max = Proj;
+            MaxIndex = i;
+        }
+    }
+    i32 MinIndexCpy = MinIndex;
+    i32 MaxIndexCpy = MaxIndex;
+    // NOTE(david): for drawing purposes this needs to be correct, for SAT purposes only checking for the normals this works either way
+    i32 Add = (MinIndexCpy < MaxIndexCpy ? 1 : -1);
+    while (MinIndexCpy != MaxIndexCpy)
+    {
+        Result.Points[Result.Size++] = Original->Points[MinIndexCpy];
+        MinIndexCpy += Add;
+        if (MinIndexCpy == Original->Size) MinIndexCpy = 0;
+        if (MinIndexCpy < 0) MinIndexCpy = Original->Size - 1;
+    }
+    Result.Points[Result.Size++] = Original->Points[MinIndexCpy];
+    MinIndexCpy = MinIndex;
+    MaxIndexCpy = MaxIndex;
+    while (MaxIndexCpy != MinIndexCpy)
+    {
+        Result.Points[Result.Size++] = Extended.Points[MaxIndexCpy];
+        MaxIndexCpy += Add;
+        if (MaxIndexCpy == Original->Size) MaxIndexCpy = 0;
+        if (MaxIndexCpy < 0) MaxIndexCpy = Original->Size - 1;
+    }
+    Result.Points[Result.Size++] = Extended.Points[MaxIndexCpy];
+
+    return (Result);
 }

@@ -98,3 +98,11 @@ PopTimedEvent(game_state *GameState)
 
     return (Result);
 }
+
+internal inline timed_event
+PeakTimedEvent(game_state *GameState)
+{
+    ASSERT(GameState->TimedEventHeapSize);
+
+    return (GameState->TimedEventHeap[0]);
+}

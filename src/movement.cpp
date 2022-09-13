@@ -1,27 +1,7 @@
 internal inline
-void WrapEntityIntoWindow(entity *Entity, game_window *Window)
+void MoveEntity(game_state *GameState, entity *Entity, game_window *Window)
 {
-    if (Entity->P.x + Entity->WrapSize.x < 0.0f)
-    {
-        Entity->P.x = (r32)Window->Width - Entity->P.x;
-    }
-    else if (Entity->P.x - Entity->WrapSize.x > (r32)Window->Width)
-    {
-        Entity->P.x = Entity->P.x - 2.0f * Entity->WrapSize.x - Window->Width;
-    }
-    if (Entity->P.y + Entity->WrapSize.y < 0.0f)
-    {
-        Entity->P.y = (r32)Window->Height - Entity->P.y;
-    }
-    else if (Entity->P.y - Entity->WrapSize.y > (r32)Window->Height)
-    {
-        Entity->P.y = Entity->P.y - 2.0f * Entity->WrapSize.y - Window->Height;
-    }
-}
-
-internal inline
-void MoveEntity(game_state *GameState, entity *Entity, game_window *Window, r32 dt)
-{
+    Entity->RotationJaw += Entity->dRotationJaw;
     if (Entity->RotationJaw > 2.0f * PI)
     {
         Entity->RotationJaw -= 2.0f * PI;
@@ -35,36 +15,52 @@ void MoveEntity(game_state *GameState, entity *Entity, game_window *Window, r32 
     Vector2 Acceleration = { Entity->FacingDirection.x * Entity->Acceleration, Entity->FacingDirection.y * Entity->Acceleration };
     Vector2 Drag = -Entity->Drag * Entity->dP;
     Acceleration = Acceleration + Drag;
-    Entity->dP.x += dt * Acceleration.x;
-    Entity->dP.y += dt * Acceleration.y;
+    Entity->dP += GameState->dt * Acceleration;
+
+    Vector2 Displacement = GameState->dt * Entity->dP + GameState->dt * GameState->dt * Acceleration / 2.0f;
     if (Entity->HasDistanceRemaining)
     {
-        Vector2 PrevP = Entity->P;
-        Vector2 NextP = Entity->P;
-        NextP.x += dt * Entity->dP.x + dt * dt * Acceleration.x / 2.0f;
-        NextP.y += dt * Entity->dP.y + dt * dt * Acceleration.y / 2.0f;
-        Vector2 Displacement = { NextP.x - PrevP.x, NextP.y - PrevP.y };
-        r32 Distance = VectorLen(Displacement);
-        if (Entity->DistanceRemaining < Distance)
+        Entity->DistanceRemaining -= VectorLen(Displacement);
+        if (Entity->DistanceRemaining < 0.0f)
         {
-            Displacement = VectorNormalize(Displacement);
-            Displacement.x *= Entity->DistanceRemaining;
-            Displacement.y *= Entity->DistanceRemaining;
-            Entity->P.x += Displacement.x;
-            Entity->P.y += Displacement.y;
-            Entity->DistanceRemaining = 0;
             RemoveEntity(GameState, Entity);
         }
-        else
+    }
+
+    if (Entity->IsAlive)
+    {
+        Vector2 NextEntityP = Entity->P + Displacement;
+        if (NextEntityP.x + Entity->WrapSize.x < 0.0f)
         {
-            Entity->DistanceRemaining -= Distance;
-            Entity->P = NextP;
+            Displacement.x = (r32)Window->Width - 2.0f * NextEntityP.x + Displacement.x;
+            // Entity->P.x = (r32)Window->Width - Entity->P.x;
+        }
+        else if (NextEntityP.x - Entity->WrapSize.x > (r32)Window->Width)
+        {
+            Displacement.x = -(2.0f * Entity->WrapSize.x + Window->Width + Displacement.x);
+            // Entity->P.x = Entity->P.x - 2.0f * Entity->WrapSize.x - Window->Width;
+        }
+        if (NextEntityP.y + Entity->WrapSize.y < 0.0f)
+        {
+            Displacement.y = (r32)Window->Height - 2.0f * NextEntityP.y + Displacement.y;
+            // Entity->P.y = (r32)Window->Height - Entity->P.y;
+        }
+        else if (NextEntityP.y - Entity->WrapSize.y > (r32)Window->Height)
+        {
+            Displacement.y = -(2.0f * Entity->WrapSize.y + Window->Height + Displacement.y);
+            // Entity->P.y = Entity->P.y - 2.0f * Entity->WrapSize.y - Window->Height;
+        }
+        Entity->P += Displacement;
+
+        if (Entity->ColliderType == Collider_Polygon)
+        {
+            for (u32 PointIndex = 0;
+                PointIndex < Entity->Collider.Size;
+                ++PointIndex)
+            {
+                Entity->Collider.Points[PointIndex] += Displacement;
+                Entity->Collider.Points[PointIndex] = VectorRotate(Entity->Collider.Points[PointIndex], Entity->P, Entity->dRotationJaw);
+            }
         }
     }
-    else
-    {
-        Entity->P.x += dt * Entity->dP.x + dt * dt * Acceleration.x / 2.0f;
-        Entity->P.y += dt * Entity->dP.y + dt * dt * Acceleration.y / 2.0f;
-    }
-    WrapEntityIntoWindow(Entity, Window);
 }

@@ -153,6 +153,8 @@ struct game_state
     timed_event TimedEventHeap[1024]; // min heap
     u32 TimedEventHeapSize;
 
+    r32 dt;
+
     entity *Ship;
     u32 ShipLifes;
 

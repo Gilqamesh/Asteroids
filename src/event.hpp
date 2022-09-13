@@ -4,6 +4,8 @@
 enum timed_event_type
 {
     TimedEvent_Invalid,
+    TimedEvent_Default,
+    TimedEvent_Repeated,
     TimedEvent_SplashScreenSound,
     TimedEvent_SplashToMain,
     TimedEvent_Ufo,

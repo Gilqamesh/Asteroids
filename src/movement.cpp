@@ -55,7 +55,7 @@ void MoveEntity(game_state *GameState, entity *Entity, game_window *Window)
         if (Entity->ColliderType == Collider_Polygon)
         {
             for (u32 PointIndex = 0;
-                PointIndex < Entity->Collider.Size;
+                PointIndex <= Entity->Collider.Size;
                 ++PointIndex)
             {
                 Entity->Collider.Points[PointIndex] += Displacement;

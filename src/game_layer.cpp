@@ -125,6 +125,9 @@ extern "C"
 
         if (GameMemory->IsMemoryInitialized == false)
         {
+#if defined(G_DEBUG)
+            DebugGlobalMemory = GameMemory;
+#endif
             InitializeArena(&GameState->WorldArena, GameMemory->PermanentStorageSize - sizeof(game_state),
                             (u8 *)GameMemory->PermanentStorage + sizeof(game_state));
             GameState->World = PushStruct(&GameState->WorldArena, world);
@@ -165,6 +168,8 @@ extern "C"
         GameState->Textures[Texture_RockSmall].Offset = {51, 51};
         GameState->Textures[Texture_Particle].t = RL->LoadTexture("textures/Particle.png");
         GameState->Textures[Texture_Particle].Offset = {10, 10};
+        GameState->Textures[Texture_Powerup_1up].t = RL->LoadTexture("textures/Powerup_1up.png");
+        GameState->Textures[Texture_Powerup_1up].Offset = {50, 50};
         GameState->Textures[Texture_SplashScreen].t = RL->LoadTexture("textures/SplashScreen.png");
         GameState->Textures[Texture_SplashScreen].Offset = {0, 0};
         GameState->Textures[Texture_Ufo].t = RL->LoadTexture("textures/Ufo.png");
@@ -194,6 +199,8 @@ extern "C"
                 GameState->Sounds[Sound_Laser].ShouldPlay = true;
                 GameState->Sounds[Sound_Phaser].sound = RL->LoadSound("sounds/phaser.wav");
                 GameState->Sounds[Sound_Phaser].ShouldPlay = true;
+                GameState->Sounds[Sound_Powerup].sound = RL->LoadSound("sounds/powerup.wav");
+                GameState->Sounds[Sound_Powerup].ShouldPlay = true;
                 GameState->Sounds[Sound_Splash].sound = RL->LoadSound("sounds/splash.wav");
                 GameState->Sounds[Sound_Splash].ShouldPlay = true;
                 GameState->Sounds[Sound_TypeWriterClick].sound = RL->LoadSound("sounds/typewriter_click.wav");
@@ -222,7 +229,7 @@ extern "C"
         AddCollisionRule(GameState, EntityType_Ship, EntityType_Ufo, &ShipVsUfo);
 
         // GameState->ScreenState = Screen_Splash;
-        GameState->ScreenState = Screen_MainMenu;
+        GameState->ScreenState = Screen_Splash;
     }
 
     void UpdateAndRender(game_memory *GameMemory, game_window *GameWindow)
@@ -633,18 +640,27 @@ extern "C"
                         }
                         if (Entity->IsAlive)
                         {
-                            // if (Entity->ColliderType == Collider_Polygon)
-                            // {
-                            //     RL->DrawLineStrip(Entity->Collider.Points, Entity->Collider.Size, RED);
-                            // }
-                            // if (Entity->ColliderType == Collider_Circle)
-                            // {
-                            //     RL->DrawCircleLines(Entity->P.x, Entity->P.y, Entity->Radius, RED);
-                            // }
-                            RL->DrawTextureRotatedScaled(Entity->texture,
-                                { Entity->P.x - (r32)Entity->texture.width / 2.0f,
-                                Entity->P.y - (r32)Entity->texture.height / 2.0f },
-                                Entity->P, Entity->RotationJaw, Entity->Scale, Entity->Tint);
+                            switch (Entity->ColliderType)
+                            {
+                                case Collider_Polygon:
+                                {
+                                    RL->DrawLineStrip(Entity->Collider.Points, Entity->Collider.Size + 1, Entity->Tint);
+                                } break ;
+                                case Collider_Circle:
+                                {
+                                    RL->DrawCircleLines(Entity->P.x, Entity->P.y, Entity->Radius, Entity->Tint);
+                                } break ;
+                                default:
+                                {
+                                } break ;
+                            }
+                            if (Entity->Type == EntityType_Particle)
+                            {
+                                RL->DrawTextureRotatedScaled(Entity->texture,
+                                    { Entity->P.x - (r32)Entity->texture.width / 2.0f,
+                                    Entity->P.y - (r32)Entity->texture.height / 2.0f },
+                                    Entity->P, Entity->RotationJaw, Entity->Scale, Entity->Tint);
+                            }
                         }
                     }
                 }

@@ -43,6 +43,7 @@ enum
     Texture_RockMedium,
     Texture_RockSmall,
     Texture_Particle,
+    Texture_Powerup_1up,
     Texture_SplashScreen,
     Texture_Ufo,
     Texture_Size
@@ -113,6 +114,7 @@ enum
     Sound_Fanfare,
     Sound_Laser,
     Sound_Phaser,
+    Sound_Powerup,
     Sound_Splash,
     Sound_TypeWriterClick,
     Sound_Ufo,

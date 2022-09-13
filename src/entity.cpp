@@ -82,9 +82,10 @@ AddShipEntity(game_state *GameState, game_window *GameWindow)
     Result->Collider.Points[0] = {-19.0f, -22.0f};
     Result->Collider.Points[1] = {30.0f, 0.0f};
     Result->Collider.Points[2] = {-20.0f, 22.0f};
+    Result->Collider.Points[3] = {-19.0f, -22.0f};
     Result->Collider.Size = 3;
     for (u32 i = 0;
-         i < Result->Collider.Size;
+         i <= Result->Collider.Size;
          ++i)
     {
         Result->Collider.Points[i] += Result->P;
@@ -217,9 +218,10 @@ AddBulletEntity(game_state *GameState, game_window *GameWindow, entity *Source, 
         Result->Collider.Points[1] = { 1.0f, -5.0f };
         Result->Collider.Points[2] = { -1.0f, 5.0f };
         Result->Collider.Points[3] = { 1.0f, 5.0f };
+        Result->Collider.Points[4] = { -1.0f, -5.0f };
         Result->Collider.Size = 4;
         for (u32 i = 0;
-            i < Result->Collider.Size;
+            i <= Result->Collider.Size;
             ++i)
         {
             Result->Collider.Points[i] += Result->P;
@@ -283,7 +285,7 @@ AddUfoEntity(game_state* GameState, game_window *GameWindow)
 
     Result->Type = EntityType_Ufo;
     Result->texture = GameState->Textures[Texture_Ufo].t;
-    Result->Tint = WHITE;
+    Result->Tint = RED;
     b32 SpawnsLeft = (GetRand(0, 1) & 1);
     Result->P = { SpawnsLeft ? 0.0f : (r32)GameWindow->Width, (r32)(GameWindow->Height / 10.0f) };
     Result->dP = { SpawnsLeft ? 150.0f : -150.0f };
@@ -296,9 +298,10 @@ AddUfoEntity(game_state* GameState, game_window *GameWindow)
     Result->Collider.Points[3] = { 29.0f, 0.0f };
     Result->Collider.Points[4] = { 20.0f, 8.0f };
     Result->Collider.Points[5] = { -20.0f, 8.0f };
+    Result->Collider.Points[6] = { -29.0f, 0.0f };
     Result->Collider.Size = 6;
     for (u32 i = 0;
-         i < Result->Collider.Size;
+         i <= Result->Collider.Size;
          ++i)
     {
         Result->Collider.Points[i] += Result->P;
@@ -397,7 +400,6 @@ COLLISION_HANDLER(BulletVsRock)
     ASSERT(IsEntityRockType(Rock));
     polygon ExtendedPolygon = ExtendPolygon(&Bullet->Collider, (Bullet->dP - Rock->dP) * GameState->dt);
     if (PolyVsCircle(&ExtendedPolygon, Rock->P, Rock->Radius))
-    // if (CircleVsCircle(Bullet->P, Bullet->Radius, Rock->P, Rock->Radius))
     {
         if (Bullet->ParentType == EntityType_Ship)
         {
@@ -430,16 +432,15 @@ COLLISION_HANDLER(RockVsShip)
     ASSERT(Ship->Type == EntityType_Ship);
     // extend polygon's size
     polygon ExtendedPolygon = ExtendPolygon(&Ship->Collider, (Ship->dP - Rock->dP) * GameState->dt);
-    RL->DrawLineStrip(ExtendedPolygon.Points, ExtendedPolygon.Size, GREEN);
+    // RL->DrawLineStrip(ExtendedPolygon.Points, ExtendedPolygon.Size, GREEN);
     if (PolyVsCircle(&Ship->Collider, Rock->P, Rock->Radius))
-    // if (CircleVsTriangle(Rock->P, Rock->Radius, Ship->Points[0] + Ship->P, Ship->Points[1] + Ship->P, Ship->Points[2] + Ship->P, Ship->P, Ship->RotationJaw))
     {
         u32 NumberOfParticles = 20;
         for (u32 ParticleIndex = 0;
             ParticleIndex < NumberOfParticles;
             ++ParticleIndex)
         {
-            AddParticleEntity(GameState, Ship->P, 300.0f, { 200, 30, 0, 150 }, 100.0f, 2.0f);
+            AddParticleEntity(GameState, Ship->P, 300.0f, { 30, 30, 255, 150 }, 100.0f, 2.0f);
         }
         RL->PlaySoundMulti(GameState->Sounds[Sound_Explosion2].sound);
         AddScore(GameState, Rock->Score);
@@ -462,8 +463,6 @@ COLLISION_HANDLER(BulletVsShip)
     ASSERT(Ship->Type == EntityType_Ship);
     polygon ExtendedPolygon = ExtendPolygon(&Ship->Collider, (Ship->dP - Bullet->dP) * GameState->dt);
     if (Bullet->Parent != Ship && PolyVsPoly(&ExtendedPolygon, &Bullet->Collider))
-    // if (Bullet->Parent != Ship && PolyVsCircle(&ExtendedPolygon, Bullet->P, Bullet->Radius))
-    // if (Bullet->Parent != Ship && CircleVsTriangle(Bullet->P, Bullet->Radius, Ship->Points[0] + Ship->P, Ship->Points[1] + Ship->P, Ship->Points[2] + Ship->P, Ship->P, Ship->RotationJaw))
     {
         u32 NumberOfParticles = 20;
         for (u32 ParticleIndex = 0;
@@ -492,7 +491,6 @@ COLLISION_HANDLER(BulletVsUfo)
     ASSERT(Ufo->Type == EntityType_Ufo);
     polygon ExtendedPolygon = ExtendPolygon(&Bullet->Collider, (Bullet->dP - Ufo->dP) * GameState->dt);
     if (Bullet->ParentType != EntityType_Ufo && PolyVsPoly(&ExtendedPolygon, &Ufo->Collider))
-    // if (Bullet->ParentType != EntityType_Ufo && CircleVsCircle(Bullet->P, Bullet->Radius, Ufo->P, Ufo->Radius))
     {
         AddScore(GameState, Ufo->Score);
         u32 NumberOfParticles = 20;
@@ -529,7 +527,6 @@ COLLISION_HANDLER(ShipVsUfo)
     ASSERT(Ufo->Type == EntityType_Ufo);
     polygon ExtendedPolygon = ExtendPolygon(&Ship->Collider, (Ship->dP - Ufo->dP) * GameState->dt);
     if (PolyVsPoly(&ExtendedPolygon, &Ufo->Collider))
-    // if (CircleVsTriangle(Ufo->P, Ufo->Radius, Ship->Points[0] + Ship->P, Ship->Points[1] + Ship->P, Ship->Points[2] + Ship->P, Ship->P, Ship->RotationJaw))
     {
         u32 NumberOfParticles = 20;
         for (u32 ParticleIndex = 0;
